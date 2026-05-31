@@ -4,7 +4,8 @@
 import fetch from 'node-fetch';
 
 export default async (req, res) => {
-    const url = 'https://api.caipiao.163.com/award_home/dlt.html?gameEn=dlt&count=50';
+    // 使用专业的、公开的彩票API
+    const url = 'http://www.lotteryapi.com/api/dlt';
 
     try {
         const response = await fetch(url);
@@ -13,16 +14,17 @@ export default async (req, res) => {
         }
         const lotteryInfo = await response.json();
 
-        if (!lotteryInfo || !lotteryInfo.awardInfoList || lotteryInfo.awardInfoList.length === 0) {
+        // 检查返回的数据结构是否正确
+        if (!lotteryInfo || !lotteryInfo.data || lotteryInfo.data.length === 0) {
             throw new Error('Invalid data structure from source API');
         }
 
-        const parsedData = lotteryInfo.awardInfoList.map(item => {
-            const numbers = item.awardNumber.split(' ');
+        // 解析新API返回的数据
+        const parsedData = lotteryInfo.data.map(item => {
             return {
-                issue: item.period,
-                red: numbers.slice(0, 5),
-                blue: numbers.slice(5)
+                issue: item.expect,
+                red: item.openCode.split('+')[0].split(','),
+                blue: item.openCode.split('+')[1].split(',')
             };
         });
 
